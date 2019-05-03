@@ -1,1 +1,4 @@
-vendor
+vendor/phpmailer
+vendor/rain
+vendor/slim
+vendor/composer
