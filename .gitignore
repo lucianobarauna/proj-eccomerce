@@ -1,4 +1,2 @@
-vendor/phpmailer
-vendor/rain
-vendor/slim
-vendor/composer
+vendor/
+vendor/!hcodebr
