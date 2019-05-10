@@ -13,7 +13,7 @@ class Page
         "data" => []
     ];
 
-    public function __construct($opts = array()) {
+    public function __construct($opts = array(), $tpl_dir = "/views/") {
         // $opts para a classe
         // config rain tpl
         
@@ -22,7 +22,7 @@ class Page
 
         // $_SERVER["DOCUMENT_ROOT"] - traz o caminho do root
         $config = array(
-            "tpl_dir"       => $_SERVER["DOCUMENT_ROOT"]."/views/", # diretório de templates
+            "tpl_dir"       => $_SERVER["DOCUMENT_ROOT"].$tpl_dir, # diretório de templates
             "cache_dir"     => $_SERVER["DOCUMENT_ROOT"]."/views-cache/", # diretório de cache do template
             "debug"         => false // set to false to improve the speed
         );
