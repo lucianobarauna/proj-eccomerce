@@ -2,3 +2,5 @@ vendor/composer
 vendor/rain
 vendor/phpmailer
 vendor/slim
+
+views-cache
