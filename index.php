@@ -1,6 +1,5 @@
 <?php 
-
-// session_start(); // iniciando a sessão
+session_start(); // Iniciando as sessões no programa
 require_once("vendor/autoload.php");
 
 use \Slim\Slim;
@@ -22,7 +21,7 @@ $app->get('/admin', function() {
     User::verifyLogin();
 
     $page = new PageAdmin();
-    $page->setTpl("index");
+    $page->setTpl("index", array('laranja', 'abacaxi', 'banana'));
 });
 
 $app->get('/admin/login', function() {
@@ -40,3 +39,11 @@ $app->post('/admin/login', function() {
     header("Location: /admin");
     exit;
 });
+
+$app->get('/admin/logout', function() {
+   User::logout();
+   header("Location: /admin/login");
+   exit;
+});
+
+$app->run();

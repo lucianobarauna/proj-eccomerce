@@ -38,6 +38,7 @@ class User extends Model
             // mantemos a constante na classe que estamos utilizando.
             $_SESSION[User::SESSION] = $user->getValues();
 
+            var_dump($user);
             return $user;
             
 

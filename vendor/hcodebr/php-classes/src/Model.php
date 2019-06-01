@@ -9,7 +9,7 @@ class Model {
     // https://www.php.net/manual/pt_BR/language.oop5.overloading.php#object.call
     public function __call($name, $args)
     {
-        var_dump($name);
+        
         // Pegando o inicio. get ou set
         $method = substr($name, 0, 3);
         // Pegando o nome do campo que foi chamado. ex: iduser

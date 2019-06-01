@@ -11,7 +11,7 @@ class Page
     private $options = [];
     private $defaults = [
         "header"=>true,
-        "fotoer"=>true,
+        "footer"=>true,
         "data" => []
     ];
 
@@ -21,6 +21,7 @@ class Page
         
         // array_merge - sobrescreve o primeiro array com o segundo.
         $this->options = array_merge($this->defaults, $opts);
+       
 
         // $_SERVER["DOCUMENT_ROOT"] - traz o caminho do root
         $config = array(
@@ -39,6 +40,11 @@ class Page
         if ($this->options["header"] === true) $this->tpl->draw("header");
 
     }
+    public function __destruct() {
+        // Quando sair do cache do php é que inserimos o footer. Aqui vai conter
+        // os arquivos JS.
+        if ($this->options["footer"] === true) $this->tpl->draw("footer");
+    }
 
     private function setData($data = array())
     {
@@ -55,11 +61,7 @@ class Page
         return $this->tpl->draw($name, $returnHTML);
     }
     
-    public function __destruct() {
-        // Quando sair do cache do php é que inserimos o footer. Aqui vai conter
-        // os arquivos JS.
-        if ($this->options["footer"] === true) $this->tpl->draw("footer");
-    }
+    
 }
 
 
