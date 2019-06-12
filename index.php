@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start(); // Iniciando as sessões no programa
 require_once("vendor/autoload.php");
 
@@ -22,7 +22,7 @@ $app->get('/admin', function() {
     User::verifyLogin();
 
     $page = new PageAdmin();
-    $page->setTpl("index", array('laranja', 'abacaxi', 'banana'));
+    $page->setTpl("index");
 });
 
 $app->get('/admin/login', function() {
@@ -98,7 +98,7 @@ $app->get('/admin/users/:iduser', function($iduser) {
 $app->post('/admin/users/create', function() {
 
     User::verifyLogin();
-    
+
     $user = new User();
 
     $_POST["inadmin"] = (isset($_POST['inadmin'])) ? 1 : 0; // se o inadmin estiver marcado é 1 se não é 0
@@ -112,18 +112,18 @@ $app->post('/admin/users/create', function() {
     $user->save();
 
     header("Location: /admin/users");
-    
+
     exit;
-    
+
 });
 
 $app->post('/admin/users/:iduser', function($iduser) {
     User::verifyLogin();
-    
+
     $user = new User();
 
     $_POST["inadmin"] = (isset($_POST['inadmin'])) ? 1 : 0; // se o inadmin estiver marcado é 1 se não é 0
-    
+
     $user->get((int)$iduser);
 
     $user->setData($_POST);
@@ -135,7 +135,30 @@ $app->post('/admin/users/:iduser', function($iduser) {
 
 });
 
+$app->get("/admin/forgot", function(){
+    $page = new PageAdmin([
+        "header"=>false,
+        "footer"=>false
+    ]);
+    $page->setTpl("forgot");
+});
 
+$app->post("/admin/forgot", function(){
+
+    $user = User::getForgot($_POST["email"]);
+
+    header("Location: /admin/forgot/sent");
+    exit;
+});
+
+$app->get("/admin/forgot/sent", function(){
+    // Aula 106 - Muito desatualizada não completei ela.
+    $page = new PageAdmin([
+        "header"=>false,
+        "footer"=>false
+    ]);
+    $page->setTpl("forgot-sent");
+});
 
 
 $app->run();

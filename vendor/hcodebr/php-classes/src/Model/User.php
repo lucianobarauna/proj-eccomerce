@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Hcode\Model;
 
@@ -8,6 +8,9 @@ use \Hcode\Model;
 class User extends Model
 {
     const SESSION = "User";
+    // const SECRET - Chave no tamanho de 16 caracteres ou mais (são valores fixos como 16, 32, 48)
+    // que são utilizados para criptografar e descriptografar.
+    const SECRET = "HcodePhp7_Secret";
 
     public static function login($login, $pasword)
     {
@@ -18,7 +21,7 @@ class User extends Model
         ));
 
         // Se não encontrou resultado
-        if(count($results) === 0) 
+        if(count($results) === 0)
         {
             // Utilizando o tratamento de erro do PHP e não um configurado por nós.
             // Por isso o motivo da barra. Agora estamos pegando a exception principal.
@@ -30,7 +33,7 @@ class User extends Model
         if(password_verify($pasword, $data["despassword"]) === true)
         {
             $user = new User();
-            
+
             $user->setData($data);
 
             // Criando uma sessão de login para sempre checar se o usuário está
@@ -39,7 +42,7 @@ class User extends Model
             $_SESSION[User::SESSION] = $user->getValues();
 
             return $user;
-            
+
 
 
         } else {
@@ -52,7 +55,7 @@ class User extends Model
     {
         // Se a sessão foi definida ou
         // Se a sessão existir ou
-        // Se o idusario que está dentro dessa sessão não for maior do que 0 
+        // Se o idusario que está dentro dessa sessão não for maior do que 0
         // (ou seja se ele existir. Nesse caso estamos fazendo um casting) ou
         // Se o usuário é um administrador
         if (
@@ -81,7 +84,7 @@ class User extends Model
         return $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b USING(idperson) ORDER BY b.desperson");
     }
 
-    public function save() 
+    public function save()
     {
         $sql = new Sql();
         $results = $sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
@@ -134,5 +137,67 @@ class User extends Model
         ));
     }
 
-    
+    public static function getForgot($email)
+    {
+
+        $sql = new Sql();
+
+        // Pegando o email cadastrado no banco.
+        $results = $sql->select("
+            SELECT * FROM tb_persons a
+            INNER JOIN tb_users b USING(idperson)
+            WHERE a.desemail = :email;
+        ", array(
+            ":email"=> $email
+        ));
+
+        if (count($results) === 0) {
+            throw new \Exception("Não foi possível recuperar a senha.");
+        } else {
+            $data = $results[0];
+
+            var_dump($data["iduser"], $_SERVER["REMOTE_ADDR"]);
+            exit;
+
+            // $results2 = $sql->select("CALL sp_userspasswordsrecoveries_create(:iduser, :desip)", array(
+			// 	":iduser"=>$data["iduser"],
+			// 	":desip"=>$_SERVER["REMOTE_ADDR"]
+            // ));
+            $results2 = $sql->select("CALL sp_userspasswordsrecoveries_create(:iduser, :desip)", array(
+				":iduser"=>$data["iduser"],
+				":desip"=>$_SERVER["REMOTE_ADDR"]
+			));
+
+
+            if (count($results2) === 0) {
+                throw new \Exception("Não foi possível recuperar a senha.");
+
+            } else {
+                $dataRecovery =  $results2[0];
+
+                // Codificando em base_64 para enviar o link ao usuário em forma de texto.
+                // $dataRecovery["idrecovery"] - criptando o valor da coluna idrecovery
+                // base64_encode(openssl_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET, $dataRecovery["idrecovery"], MCRYPT_MODE_ECB));
+
+                $iv = random_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+                $code = openssl_encrypt($dataRecovery['idrecovery'], 'aes-256-cbc', User::SECRET, 0, $iv);
+                $link = "http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
+
+                $mailer = new Mailer(
+                    $data["desemail"],
+                    $data["desperson"],
+                    "Redefinir Senha da Hcode Store, forgot",
+                    array(
+                        "name" => $data["desperson"],
+                        "link" => $link
+                    )
+                );
+
+                $mailer->send();
+
+                return $data;
+            }
+        }
+    }
+
 }
