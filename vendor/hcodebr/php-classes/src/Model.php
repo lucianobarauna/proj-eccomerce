@@ -9,7 +9,7 @@ class Model {
     // https://www.php.net/manual/pt_BR/language.oop5.overloading.php#object.call
     public function __call($name, $args)
     {
-        
+
         // Pegando o inicio. get ou set
         $method = substr($name, 0, 3);
         // Pegando o nome do campo que foi chamado. ex: iduser
@@ -18,7 +18,8 @@ class Model {
         switch ($method) {
             case 'get':
                 // Setando o nome do campo
-                return $this->values[$fieldName];
+                // Se ele existir retorna ele se não retorna null
+                return (isset($this->values[$fieldName])) ? $this->values[$fieldName] : NULL;
             break;
             case 'set':
                 // Setando o nome do campo e atribuindo o valor do mesmo
