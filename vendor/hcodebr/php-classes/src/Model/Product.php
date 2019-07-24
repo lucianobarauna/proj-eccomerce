@@ -11,9 +11,27 @@ class Product extends Model
 
     public static function listAll()
     {
-        // Retorna toda a lista de usuários
+        // Retorna toda a lista de produtos
         $sql = new Sql();
         return $sql->select("SELECT * FROM tb_products ORDER BY desproduct");
+    }
+
+    public static function checkList($list)
+    {
+        foreach ($list as &$row) {
+            // &$row está com a referência de list então ele está alterando ela.
+            // deixando nesse caso de ser o index do forEach
+            $p = new Product();
+            $p->setData($row);
+            $row = $p->getValues();
+        }
+
+        return $list;
+    }
+
+    public function FunctionName(Type $var = null)
+    {
+        # code...
     }
 
     public function save()
