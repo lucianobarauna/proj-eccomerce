@@ -16,13 +16,30 @@ $app->get('/', function(){
 });
 
 $app->get("/categories/:idcategory", function($idcategory){
+
+	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1; // Pegando a página pela url, se não tiver página na url é retornada a primeira.
 	$category = new Category();
+
 	$category->get((int)$idcategory);
+
+	$pagination = $category->getProductsPage($page);
+
+	// Criando link para próxima página e número de página
+	$pages = [];
+
+	for ($i=1; $i < $pagination['pages']; $i++) {
+		array_push($pages, [
+			'link'=>'/categories/'.$category->getidcategory().'?page='.$i,
+			'page'=>$i
+		]);
+	}
+
 	$page = new Page();
+
 	$page->setTpl("category", [
 		'category'=>$category->getValues(),
-		'products'=>Product::checklist($category->getProducts()),
-		// 'pages'=>$pages
+		'products'=>$pagination["data"],
+		'pages'=> $pages
 	]);
 });
 
