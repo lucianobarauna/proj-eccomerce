@@ -12,6 +12,40 @@ class User extends Model
     // que são utilizados para criptografar e descriptografar.
     const SECRET = "HcodePhp7_Secret";
 
+    public static function getFromSession()
+    {
+        $user = new User();
+
+        if (isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]['iduser'] > 0) {
+			$user->setData($_SESSION[User::SESSION]);
+        }
+        return $user;
+    }
+    // Checa se o usuário está logado e é administrador
+    public static function checkLogin($inadmin = true)
+    {
+        if(
+            !isset($_SESSION[User::SESSION])
+            ||
+            !$_SESSION[User::SESSION]
+            ||
+            !(int)$_SESSION[User::SESSION]["iduser"] > 0
+        ) {
+            // Não está logado
+            return false;
+        } else {
+            // Se estamos logados e o usuário é um administrador.
+            if($inadmin === true && (bool)(int)$_SESSION[User::SESSION]["iduser"] === true){
+                return true;
+
+            } else if ($inadmin === false) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     public static function login($login, $pasword)
     {
         $sql = new Sql();
@@ -58,15 +92,20 @@ class User extends Model
         // Se o idusario que está dentro dessa sessão não for maior do que 0
         // (ou seja se ele existir. Nesse caso estamos fazendo um casting) ou
         // Se o usuário é um administrador
-        if (
-            !isset($_SESSION[User::SESSION])
-            ||
-            !$_SESSION[User::SESSION]
-            ||
-            !(int)$_SESSION[User::SESSION]["iduser"] > 0
-            ||
-            (bool)$_SESSION[User::SESSION]["inadmin"] !== $inadmin
-        ) {
+        // if (
+        //     !isset($_SESSION[User::SESSION])
+        //     ||
+        //     !$_SESSION[User::SESSION]
+        //     ||
+        //     !(int)$_SESSION[User::SESSION]["iduser"] > 0
+        //     ||
+        //     (bool)$_SESSION[User::SESSION]["inadmin"] !== $inadmin
+        // ) {
+        //     header("Location: /admin/login");
+        //     exit;
+        // }
+        //  Refatorando o código para User::checkLogin()
+        if (User::checkLogin($inadmin)) {
             header("Location: /admin/login");
             exit;
         }
