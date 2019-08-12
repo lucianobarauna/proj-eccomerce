@@ -29,11 +29,6 @@ class Product extends Model
         return $list;
     }
 
-    public function FunctionName(Type $var = null)
-    {
-        # code...
-    }
-
     public function save()
     {
         $sql = new Sql();
@@ -95,12 +90,12 @@ class Product extends Model
     {
         $this->checkPhoto();
         // Reescrevendo o método getValues que vem de model.
-        $values = parent::getValues();
 
         // $page->setTpl("products-update", [
-        //     'product'=>$product->getValues()
-        // ]);
+            //     'product'=>$product->getValues()
+            // ]);
 
+        $values = parent::getValues();
         return $values;
     }
 
@@ -143,6 +138,27 @@ class Product extends Model
 
         $this->checkPhoto();
 
+    }
+
+    public function getFromURL($desurl)
+    {
+        $sql = new Sql();
+
+        $rows = $sql->select("SELECT * FROM tb_products WHERE desurl = :desurl LIMIT 1", [
+            ':desurl' =>$desurl
+        ]);
+        $this->setData($rows[0]);
+    }
+
+    public function getCategories()
+    {
+        $sql = new Sql();
+
+        return $sql->select("
+            SELECT * FROM tb_categories a INNER JOIN tb_productscategories b ON a.idcategory = b.idcategory WHERE b.idproduct = :idproduct
+        ",[
+            'idproduct'=>$this->getidproduct()
+        ]);
     }
 
 
