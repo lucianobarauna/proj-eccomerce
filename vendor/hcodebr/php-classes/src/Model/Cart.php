@@ -149,10 +149,10 @@ class Cart extends Model
 	{
  		$sql = new Sql();
  		$results = $sql->select("
-			SELECT COUNT(*) AS nrqtd, SUM(b.vlprice) AS vlprice, SUM(b.vlwidth) AS vlwidth, SUM(b.vlheight) AS vlheight, SUM(b.vllength) AS vllength, SUM(b.vlweight) AS vlweight
-			FROM tb_cartsproducts a
-			INNER JOIN tb_products b ON a.idproduct = b.idproduct
-			WHERE a.idcart = :idcart AND a.dtremoved IS NULL
+         SELECT SUM(vlprice) AS vlprice, SUM(vlwidth) AS vlwidth, SUM(vlheight) AS vlheight, SUM(vllength) AS vllength, SUM(vlweight) AS vlweight, COUNT(*) AS nrqtd
+         FROM tb_products a
+         INNER JOIN tb_cartsproducts b ON a.idproduct = b.idproduct
+         WHERE b.idcart = :idcart AND dtremoved IS NULL;
 		", [
 			':idcart'=>$this->getidcart()
 		]);
@@ -164,32 +164,33 @@ class Cart extends Model
     }
 
     //  Monta o frete de acordo com a tabela dos correios
-    public function setFreight($zipcode)
+    public function setFreight($nrzipcode)
     {
-        $nrzipcode = str_replace('-', '', $zipcode);
+        $nrzipcode = str_replace('-', '', $nrzipcode);
 
         $totals = $this->getProductsTotals();
 
         if($totals['nrqtd'] > 0) {
             if($totals['vlheight'] < 2) $totals['vlheight'] = 2;
             if($totals['vllength'] < 16) $totals['vllength'] = 16;
+            if($totals['vlwidth'] < 11) $totals['vlwidth'] = 11;
 
             // Monta a query para http
             $qs = http_build_query([
-                "nCdEmpresa"=>"",
-                "sDsSenha"=>"",
-                "nCdServico"=>"40010",
-                "sCepOrigem"=>"09853120",
-                "sCepDestino"=>$nrzipcode,
-                "nVlPeso"=>$totals['vlweight'],
-                "nCdFormato"=>"1",
-                "nVlComprimento"=>$vllength,
-                "nVlAltura"=>$totals['vlheight'],
-                "nVlLargura"=>$totals['vlwidth'],
-                "nVlDiametro"=>"0",
-                "sCdMaoPropria"=>"S",
-                "nVlValorDeclarado"=>$totals['vlprice'],
-                "sCdAvisoRecebimento"=>"S"
+                'nCdEmpresa'=>'',
+				'sDsSenha'=>'',
+				'nCdServico'=>'40010',
+				'sCepOrigem'=>'09853120',
+				'sCepDestino'=>$nrzipcode,
+				'nVlPeso'=>$totals['vlweight'],
+				'nCdFormato'=>'1',
+				'nVlComprimento'=>$totals['vllength'],
+				'nVlAltura'=>$totals['vlheight'],
+				'nVlLargura'=>$totals['vlwidth'],
+				'nVlDiametro'=>'0',
+				'sCdMaoPropria'=>'S',
+				'nVlValorDeclarado'=>$totals['vlprice'],
+				'sCdAvisoRecebimento'=>'S'
             ]);
 
             $xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
@@ -227,16 +228,16 @@ class Cart extends Model
         $_SESSION[Cart::SESSION_ERROR] = $msg;
     }
 
-    public static function getMsgError($msg)
+    public static function getMsgError()
     {
-        // $msg = (isset($_SESSION[Cart::SESSION_ERROR])) ? $_SESSION[Cart::SESSION_ERROR] : "";
+        $msg = (isset($_SESSION[Cart::SESSION_ERROR])) ? $_SESSION[Cart::SESSION_ERROR] : "";
 
-        // Cart::clearMsgError();
+        Cart::clearMsgError();
 
-        // return $msg;
+        return $msg;
     }
 
-    public static function clearMsgError($msg)
+    public static function clearMsgError()
     {
         $_SESSION[Cart::SESSION_ERROR] = NULL;
     }
@@ -253,7 +254,7 @@ class Cart extends Model
     {
         $this->getCalculateTotal();
 
-        return Parent::getValues();
+        return parent::getValues();
     }
 
     public function getCalculateTotal()
