@@ -8,9 +8,11 @@ use \Hcode\Model;
 class User extends Model
 {
     const SESSION = "User";
+    const SECRET = "HcodePhp7_Secret";
+    CONST ERROR = "UserError";
+    const ERROR_RESGISTER = "UserErrorRegister";
     // const SECRET - Chave no tamanho de 16 caracteres ou mais (são valores fixos como 16, 32, 48)
     // que são utilizados para criptografar e descriptografar.
-    const SECRET = "HcodePhp7_Secret";
 
     public static function getFromSession()
     {
@@ -106,7 +108,12 @@ class User extends Model
         // }
         //  Refatorando o código para User::checkLogin()
         if (User::checkLogin($inadmin)) {
-            header("Location: /admin/login");
+
+            if($inadmin){
+                header("Location: /admin/login");
+            } else {
+                header("Location: /login");
+            }
             exit;
         }
     }
@@ -239,4 +246,22 @@ class User extends Model
         }
     }
 
+    public static function setError($msg)
+    {
+        $_SESSION[User::ERROR] = $msg;
+    }
+
+    public static function getError()
+    {
+        $msg = (isset($_SESSION[User::ERROR]) &&  $_SESSION[User::ERROR]) ? $_SESSION[User::ERROR] : "";
+
+        User::clearError();
+
+        return $msg;
+    }
+
+    public static function clearError()
+    {
+        $_SESSION[User::ERROR] = NULL;
+    }
 }
