@@ -9,8 +9,10 @@ class User extends Model
 {
     const SESSION = "User";
     const SECRET = "HcodePhp7_Secret";
+    const SECRET_IV = "HcodePhp7_Secret_IV";
     CONST ERROR = "UserError";
-    const ERROR_RESGISTER = "UserErrorRegister";
+    const ERROR_REGISTER = "UserErrorRegister";
+    const SUCCESS = "UserSucesss";
     // const SECRET - Chave no tamanho de 16 caracteres ou mais (são valores fixos como 16, 32, 48)
     // que são utilizados para criptografar e descriptografar.
 
@@ -144,6 +146,7 @@ class User extends Model
             ":inadmin"=>$this->getinadmin()
         ));
 
+
         $this->setData($results[0]);
     }
 
@@ -175,6 +178,7 @@ class User extends Model
             ":nrphone"=>$this->getnrphone(),
             ":inadmin"=>$this->getinadmin()
         ));
+
 
         $this->setData($results[0]);
 
@@ -271,7 +275,34 @@ class User extends Model
         $_SESSION[User::ERROR] = NULL;
     }
 
-    public static function getPasswordHash($pasword)
+    public static function setErrorRegister($msg)
+	{
+		$_SESSION[User::ERROR_REGISTER] = $msg;
+    }
+
+	public static function getErrorRegister()
+	{
+		$msg = (isset($_SESSION[User::ERROR_REGISTER]) && $_SESSION[User::ERROR_REGISTER]) ? $_SESSION[User::ERROR_REGISTER] : '';
+		User::clearErrorRegister();
+		return $msg;
+	}
+
+	public static function clearErrorRegister()
+	{
+		$_SESSION[User::ERROR_REGISTER] = NULL;
+    }
+
+    public static function checkLoginExist($login)
+	{
+		$sql = new Sql();
+		$results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :deslogin", [
+			':deslogin'=>$login
+        ]);
+        // Se retornou algum login que já existe é true
+		return (count($results) > 0);
+	}
+
+    public static function getPasswordHash($password)
     {
         return password_hash($password, PASSWORD_DEFAULT, [
             'cost'=>12
