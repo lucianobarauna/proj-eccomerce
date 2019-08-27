@@ -54,9 +54,13 @@ class User extends Model
     {
         $sql = new Sql();
 
-        $results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :LOGIN", array(
-            ":LOGIN"=>$login
-        ));
+        // $results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :LOGIN", array(
+        //     ":LOGIN"=>$login
+        // ));
+
+        $results = $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b ON a.idperson = b.idperson WHERE a.deslogin = :LOGIN", array(
+			":LOGIN"=>$login
+		));
 
         // Se não encontrou resultado
         if(count($results) === 0)
@@ -193,7 +197,7 @@ class User extends Model
         ));
     }
 
-    public static function getForgot($email)
+    public static function getForgot($email, $inadmin = true)
     {
 
         $sql = new Sql();
@@ -237,7 +241,14 @@ class User extends Model
 
                 $iv = random_bytes(openssl_cipher_iv_length('aes-256-cbc'));
                 $code = openssl_encrypt($dataRecovery['idrecovery'], 'aes-256-cbc', User::SECRET, 0, $iv);
-                $link = "http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
+
+                if($inadmin === true) {
+                    $link = "http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
+
+                } else {
+                    $link = "http://www.hcodecommerce.com.br/forgot/reset?code=$code";
+                }
+
 
                 $mailer = new Mailer(
                     $data["desemail"],
