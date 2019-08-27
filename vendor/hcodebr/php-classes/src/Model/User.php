@@ -115,7 +115,7 @@ class User extends Model
         //     exit;
         // }
         //  Refatorando o código para User::checkLogin()
-        if (User::checkLogin($inadmin)) {
+        if (!User::checkLogin($inadmin)) {
 
             if($inadmin){
                 header("Location: /admin/login");
@@ -284,6 +284,25 @@ class User extends Model
     public static function clearError()
     {
         $_SESSION[User::ERROR] = NULL;
+    }
+
+    public static function setSuccess($msg)
+    {
+        $_SESSION[User::SUCCESS] = $msg;
+    }
+
+    public static function getSuccess()
+    {
+        $msg = (isset($_SESSION[User::SUCCESS]) &&  $_SESSION[User::SUCCESS]) ? $_SESSION[User::SUCCESS] : "";
+
+        User::clearSuccess();
+
+        return $msg;
+    }
+
+    public static function clearSuccess()
+    {
+        $_SESSION[User::SUCCESS] = NULL;
     }
 
     public static function setErrorRegister($msg)
