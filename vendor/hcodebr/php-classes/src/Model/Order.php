@@ -62,7 +62,7 @@ class Order extends Model {
 			':idorder'=>$this->getidorder()
 		]);
 	}
-	public function getCart():Cart
+	public function getCart():Cart // retornando uma instancia da class Cart
 	{
 		$cart = new Cart();
 		$cart->get((int)$this->getidcart());
